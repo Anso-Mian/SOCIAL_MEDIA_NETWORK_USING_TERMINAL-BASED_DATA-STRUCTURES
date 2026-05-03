@@ -67,9 +67,9 @@ struct User {
     string bio;
     string lastActive;
     
+    Post* postsHead = nullptr;
     User* next; // For Hash Table chaining (and temporary Phase 2 linked list)
     
-    Post* postsHead = nullptr; 
     Edge* friendsHead = nullptr; 
     Conversation* conversationsHead = nullptr;
     Notification* notificationsFront = nullptr;
@@ -82,6 +82,9 @@ struct User {
 extern User* currentUser;          // Tracks who is logged in
 extern User* dummyUserListHead;    // Temporary list for Phase 2 before Hash Table
 extern string PostIDCounter; // Global counter for unique Post IDs
+extern Post* globalFeedHead; 
+extern Post* globalFeedTail;
+extern Story* storiesHead;
 // ==========================================
 // FUNCTION PROTOTYPES (Declarations)
 // ==========================================
@@ -93,9 +96,27 @@ User* searchUser(string userName);
 // (You will add more prototypes here as you build Modules B, C, D, etc.)
 
 void createPost(string content);
+void deletePost(string targetID);
 void displayPost();
 
 void addFriend(string User1, string User2);
 void displayFriends(string userName);
+void removeFriend(string User1, string User2);
+
+void sendMessage(string toUser,string text);
+void latestMessage(string withUser);
+void deleteLatestMessage(string withUser);
+void viewConversation(string withUser);
+
+void addNotification(string userName, string message);
+void viewNotification();
+void peekNotification();
+void processNotification();
+
+void viewFeed();
+void displayTrendingPosts();
+
+void addStory(string content);
+void viewStory();
 
 #endif

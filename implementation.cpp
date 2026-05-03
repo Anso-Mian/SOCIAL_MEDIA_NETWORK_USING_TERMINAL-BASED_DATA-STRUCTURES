@@ -5,6 +5,9 @@ using namespace std;
 User* dummyUserListHead = nullptr;
 User* currentUser = nullptr;
 string PostIDCounter = "0";
+Post* globalFeedHead=nullptr;
+Post* globalFeedTail=nullptr;
+Story* storiesHead = nullptr;
 
 User* searchUser(string userName){
     User* temp = dummyUserListHead;
@@ -61,31 +64,113 @@ bool loginUser(string userName,string pass){
             }
         }
 }
-
 void createPost(string content){
     if(currentUser==nullptr){
         cout<<"The user is not logged in"<<endl;
         return;
     }
-    else{
-        Post* newPost=new Post;
-        newPost->postID=to_string(stoi(PostIDCounter) + 1);
-        PostIDCounter = newPost->postID;
-        newPost->content=content;
-        newPost->owner=currentUser->userName;
-        newPost->likes=0;
-        newPost->next=nullptr;
-        newPost->prev=nullptr;
+    
+    Post* newGlobalPost = new Post;
+    newGlobalPost->postID = to_string(stoi(PostIDCounter) + 1);
+    PostIDCounter = newGlobalPost->postID;
+    newGlobalPost->content = content;
+    newGlobalPost->owner = currentUser->userName;
+    newGlobalPost->likes = 0;
+    
+    newGlobalPost->prev = nullptr;
+    newGlobalPost->next = globalFeedHead;
 
-        if(currentUser->postsHead==nullptr){
-            currentUser->postsHead=newPost;
+    if(globalFeedHead == nullptr){
+        globalFeedHead = newGlobalPost;
+        globalFeedTail = newGlobalPost; 
+    }
+    else{
+        globalFeedHead->prev = newGlobalPost;
+        globalFeedHead = newGlobalPost; 
+    }
+
+    Post* newUserPost = new Post;
+    newUserPost->postID = newGlobalPost->postID; 
+    newUserPost->owner = currentUser->userName;
+    newUserPost->likes = 0;
+
+    newUserPost->prev = nullptr;
+    newUserPost->next = currentUser->postsHead;
+
+    if(currentUser->postsHead != nullptr){
+        currentUser->postsHead->prev = newUserPost;
+    }
+    currentUser->postsHead = newUserPost;
+    
+    cout << "Post created successfully! (ID: " << newGlobalPost->postID << ")" << endl;
+}
+
+void deletePost(string targetID){
+    if(currentUser==nullptr){
+        cout<<"THe user is not logged in"<<endl;
+        return;
+    }
+
+    Post* temp=currentUser->postsHead;
+
+    while(temp!=nullptr){
+        if(temp->postID==targetID){
+            break;
         }
-        else{
-            newPost->next=currentUser->postsHead;
-            currentUser->postsHead->prev=newPost;
-            currentUser->postsHead=newPost;
+        temp=temp->next;
+    }
+
+    if(temp==nullptr){
+        cout<<"No such post with ID found"<<endl;
+        return;
+    }
+    else if(temp==currentUser->postsHead){
+        currentUser->postsHead=currentUser->postsHead->next;
+
+        if(currentUser->postsHead!=nullptr){
+        currentUser->postsHead->prev=nullptr;
         }
     }
+    else{
+        temp->prev->next=temp->next;
+        if(temp->next!=nullptr){
+            temp->next->prev=temp->prev;
+        }
+    }
+
+    Post* globalTemp=globalFeedHead;
+        while(globalTemp!=nullptr){
+        if(globalTemp->postID==targetID){
+            break;
+        }
+        globalTemp=globalTemp->next;
+    }
+
+    if(globalTemp==globalFeedHead){
+        globalFeedHead=globalFeedHead->next;
+
+        if(globalFeedHead!=nullptr){
+        globalFeedHead->prev=nullptr;
+        }
+        else{
+            globalFeedTail=nullptr;
+        }
+    }
+    else{
+        globalTemp->prev->next=globalTemp->next;
+
+        if(globalTemp->next!=nullptr){
+            globalTemp->next->prev=globalTemp->prev;
+        }
+        if(globalTemp==globalFeedTail){
+            globalFeedTail=globalTemp->prev;
+        }
+    }
+
+    delete temp;
+    delete globalTemp;
+
+    cout << "Post " << targetID << " has been deleted." << endl;
 }
 
 void displayPost(){
@@ -93,20 +178,21 @@ void displayPost(){
         cout<<"The user is not logged in"<<endl;
         return;
     }
-    else if(currentUser->postsHead==nullptr){
-        cout<<"The user has no posts yet"<<endl;
+    
+    if(currentUser->postsHead == nullptr){
+        cout<<"You have no posts yet!"<<endl;
         return;
     }
-    else{
-        Post* temp=currentUser->postsHead;
-        while(temp!=nullptr){
-            cout<<"Post ID: "<<temp->postID<<endl;
-            cout<<"Content: "<<temp->content<<endl;
-            cout<<"Owner: "<<temp->owner<<endl;
-            cout<<"Likes: "<<temp->likes<<endl;
-            temp=temp->next;
-            cout<<endl;
-        }
+
+    Post* temp = currentUser->postsHead;
+    cout << "=== YOUR POSTS ===" << endl;
+
+    while(temp != nullptr){
+        cout<<"Post ID: "<<temp->postID<<endl;
+        cout<<"Content: "<<temp->content<<endl;
+        cout<<"Likes: "<<temp->likes<<endl;
+        cout<<"------------------"<<endl;
+        temp = temp->next; 
     }
 }
 
@@ -174,7 +260,7 @@ void displayFriends(string userName){
         }
     else{
         if(user->friendsHead==nullptr){
-                cout<<"The user has no freinds"<<endl;
+                cout<<"The user has no friends"<<endl;
                 return;
         }
         Edge* temp=user->friendsHead;
@@ -314,20 +400,20 @@ void sendMessage(string toUser,string text){
     }
 
     if(!found && foundConversion==nullptr){
-        Conversation* recieverConv=new Conversation;
-        recieverConv->withUser=currentUser->userName;
-        recieverConv->messageStackTop=nullptr;
+        Conversation* receiverConv=new Conversation;
+        receiverConv->withUser=currentUser->userName;
+        receiverConv->messageStackTop=nullptr;
 
-        recieverConv->next=touser->conversationsHead;
-        touser->conversationsHead=recieverConv;
-        foundConversion=recieverConv;
+        receiverConv->next=touser->conversationsHead;
+        touser->conversationsHead=receiverConv;
+        foundConversion=receiverConv;
     }
-    Message* recieverMessage=new Message;
-    recieverMessage->fromUser=currentUser->userName;
-    recieverMessage->toUser=touser->userName;
-    recieverMessage->text=text;
-    recieverMessage->next=foundConversion->messageStackTop;
-    foundConversion->messageStackTop=recieverMessage;
+    Message* receiverMessage=new Message;
+    receiverMessage->fromUser=currentUser->userName;
+    receiverMessage->toUser=touser->userName;
+    receiverMessage->text=text;
+    receiverMessage->next=foundConversion->messageStackTop;
+    foundConversion->messageStackTop=receiverMessage;
 
     cout << "Message sent successfully to " << toUser<< endl;
 }
@@ -401,6 +487,259 @@ void deleteLatestMessage(string withUser){
             targetConv->messageStackTop=targetConv->messageStackTop->next;
             delete toDelete;
             cout<<"The latest message has been deleted."<<endl;
+        }
     }
 }
 
+void viewConversation(string withUser){
+    if(currentUser==nullptr){
+        cout<<"THe user is not logged in"<<endl;
+        return;
+    }
+
+    User* targetUser=searchUser(withUser);
+    if(targetUser==nullptr){
+        cout<<"No such user exists"<<endl;
+        return;
+    }
+
+    Conversation* temp= currentUser->conversationsHead;
+
+    while(temp!=nullptr){
+        if(temp->withUser==targetUser->userName){
+            break;
+        }
+        temp=temp->next;
+    }
+    if(temp==nullptr){
+        cout<<"No such chat with user found"<<endl;
+        return;
+    }
+    Message* messages=temp->messageStackTop;
+    if(messages==nullptr){
+        cout << "No messages in this conversation." << endl;
+        return;
+    }
+
+    cout << "=== Chat History with " << withUser << " ===" << endl;
+    while(messages!=nullptr){
+        cout<<"- Sent by: "<<messages->fromUser<<endl;
+        cout<<"- Sent to: "<<messages->toUser<<endl;
+        cout<<"- Text: "<<messages->text<<endl;
+
+        messages=messages->next;
+    }
+}
+
+void addNotification(string userName, string message){
+    User* targetUser=searchUser(userName);
+    if(targetUser==nullptr){
+        cout<<"The user does not exist"<<endl;
+        return;
+    }
+    
+    Notification* newNotification=new Notification;
+    newNotification->message=message;
+    newNotification->next=nullptr;
+
+    if(targetUser->notificationsFront==nullptr){
+        targetUser->notificationsFront=newNotification;
+        targetUser->notificationsRear=newNotification;
+    }
+    else{
+        targetUser->notificationsRear->next=newNotification;
+        targetUser->notificationsRear = newNotification;
+    }
+}
+
+void viewNotification(){
+
+    if(currentUser==nullptr){
+        cout<<"The user is not logged in"<<endl;
+        return;
+    }
+
+    Notification* temp=currentUser->notificationsFront;
+    
+    if(temp==nullptr){
+        cout<<"You have no notifications"<<endl;
+        return;
+    }
+    else{
+        while(temp !=nullptr){
+            cout<<"- "<<temp->message<<endl;
+            temp=temp->next;
+        }
+    }
+}
+
+void peekNotification() {
+    if(currentUser == nullptr){
+        cout << "The user is not logged in" << endl;
+        return;
+    }
+    
+    if(currentUser->notificationsFront == nullptr) {
+        cout << "You have no new notifications." << endl;
+        return;
+    }
+    
+    cout << "Next Notification: " << currentUser->notificationsFront->message << endl;
+}
+
+void processNotification(){
+    if(currentUser==nullptr){
+        cout<<"The user is not logged in"<<endl;
+        return;
+    }
+
+    if(currentUser->notificationsFront == nullptr){
+        cout<<"You have no notifications to process"<<endl;
+        return;
+    }
+
+    Notification* toDelete = currentUser->notificationsFront;
+
+    cout << "Processing Notification: " << toDelete->message << endl;
+
+    currentUser->notificationsFront = currentUser->notificationsFront->next;
+
+    // 6. SAFETY CATCH: If that was the last notification, reset the rear pointer too
+    if(currentUser->notificationsFront == nullptr){
+        currentUser->notificationsRear = nullptr;
+    }
+
+    delete toDelete;
+    cout << "Notification removed from queue." << endl;
+}
+
+void viewFeed(){
+
+    if(currentUser==nullptr){
+        cout<<"THe user is not logged in"<<endl;
+        return;
+    }
+
+    Post* currentPost=globalFeedHead;
+
+    if(globalFeedHead!=nullptr){
+        while(true){
+            int choice;
+            cout<<"- Owner: "<<currentPost->owner<<endl;
+            cout<<"- Content: "<<currentPost->content<<endl;
+            cout<<"- Likes: "<<currentPost->likes<<endl;
+
+            label:
+            cout<<"----------- FEED ACTIONS -----------"<<endl;
+            cout<<"[1] Next, "<<"[2] Previous, "<<"[3] Like, "<<"[4] Quit"<<endl;
+
+            cout<<"Enter your choice:";
+            cin>>choice;
+            
+            if(choice < 1 || choice > 4){
+                cout<<"The wrong choice"<<endl;
+                goto label;
+            }
+            else{
+                switch(choice){
+                    case 1:
+                        if(currentPost->next!=nullptr){
+                            currentPost=currentPost->next;
+                        }
+                        else{
+                            cout<<"You have reached the bottom"<<endl;
+                        }
+                        break;
+                    case 2:
+                        if(currentPost->prev!=nullptr){
+                            currentPost=currentPost->prev;
+                        }
+                        else{
+                            cout<<"You are the at the top"<<endl;
+                        }
+                        break;
+                    case 3:
+                        ++currentPost->likes;
+                        break;
+                    case 4:
+                        return;
+                    default:
+                        cout<<"Error Occurred"<<endl;
+                        return;
+                }
+            }   
+        }
+    }
+    else{
+        cout << "The feed is currently empty!" << endl;
+        return;
+    }
+}
+
+void addStory(string content){
+    if(currentUser==nullptr){
+        cout<<"THe user is not logged in."<<endl;
+        return;
+    }
+    Story* newStory=new Story;
+    newStory->userName=currentUser->userName;
+    newStory->storyContent=content;
+
+    if(storiesHead==nullptr){
+        storiesHead=newStory;
+        newStory->next=storiesHead;
+    }
+    else{
+        Story* temp=storiesHead;
+        while(temp->next!=storiesHead){
+            temp= temp->next;
+        }
+
+        temp->next=newStory;
+        newStory->next=storiesHead;
+    }
+}
+
+void viewStory(){
+    if(currentUser==nullptr){
+        cout<<"The user is not logged in"<<endl;
+        return;
+    }
+
+    else if(storiesHead==nullptr){
+        cout<<"There are no stories"<<endl;
+        return;
+    }
+    else{
+        Story* temp = storiesHead;
+        while(true){
+            int choice;
+            cout<<"------- Story ----------"<<endl;
+            cout<<"- User Name: "<<temp->userName<<endl;
+            cout<<"- Story Content: "<<temp->storyContent<<endl;
+
+            label:
+            cout<<"----------- FEED ACTIONS -----------"<<endl;
+            cout<<"[1] Next, "<<"[2] Quit"<<endl;
+
+            cout<<"Enter your choice:";
+            cin>>choice;
+            
+            if(choice < 1 || choice > 2){
+                cout<<"The wrong choice"<<endl;
+                goto label;
+            }
+
+            switch(choice){
+                case 1:
+                    temp=temp->next;
+                    break;
+                case 2:
+                    return;
+                default:
+                    cout<<"Some Error occurred"<<endl;
+                    return;
+            }
+        }
+    }
+}

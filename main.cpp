@@ -9,7 +9,7 @@ int main() {
     cout << "Phase 1: Structures loaded successfully!" << endl;
     cout << "Ready to build the Social Media Platform." << endl;
     
-    // Regisering Users
+    // Registering Users
     registerUser("Ans","123","gmail","Life");
     registerUser("Ahmed","123","gmail","Life");
     registerUser("Ak","123","gmail","Life");
@@ -39,5 +39,25 @@ int main() {
     removeFriend("Ans","Sheila");
     displayFriends("Ans");
     
+    // checking the send message function
+    sendMessage("Ahmed","Hello Ahmed, how are you?");
+    sendMessage("Ahmed","Are you there?");
+    sendMessage("Ak","Hey Ak, what's up?");
+    latestMessage("Ahmed");
+    latestMessage("Ak");
+    deleteLatestMessage("Ahmed");
+    latestMessage("Ahmed");
+
+    //checking notification
+    addNotification("Ans","Hey Wasp");
+    addNotification("Ans","LOL");
+    viewNotification();
+    peekNotification();
+    processNotification();
+    viewNotification();
+
+    // checking the viewFeed function
+    viewFeed();
+
     return 0;
 }   
