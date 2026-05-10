@@ -59,7 +59,6 @@ struct AVLNode {
     int height;
 };
 
-// --- THE CENTRAL HUB ---
 struct User {
     string userName; 
     string password;
@@ -68,7 +67,7 @@ struct User {
     string lastActive;
     
     Post* postsHead = nullptr;
-    User* next; // For Hash Table chaining (and temporary Phase 2 linked list)
+    User* next;
     
     Edge* friendsHead = nullptr; 
     Conversation* conversationsHead = nullptr;
@@ -79,31 +78,40 @@ struct User {
 // ==========================================
 // GLOBAL VARIABLES
 // ==========================================
-extern User* currentUser;          // Tracks who is logged in
-extern User* dummyUserListHead;    // Temporary list for Phase 2 before Hash Table
-extern string PostIDCounter; // Global counter for unique Post IDs
+const int TABLE_SIZE = 10;
+extern User* hashTable[TABLE_SIZE];
+extern User* currentUser;
+extern string PostIDCounter;
 extern Post* globalFeedHead; 
 extern Post* globalFeedTail;
 extern Story* storiesHead;
+extern AVLNode* userAVLRoot;
+extern AVLNode* postAVLRoot;
+
 // ==========================================
-// FUNCTION PROTOTYPES (Declarations)
+// FUNCTION PROTOTYPES
 // ==========================================
-// User Management
+
+int hashFunction(string key);
 void registerUser(string userName, string pass, string email, string bio);
 bool loginUser(string userName, string pass);
 User* searchUser(string userName);
-
-// (You will add more prototypes here as you build Modules B, C, D, etc.)
+void deleteUser(string userName);
+void displayAllUsers();
 
 void createPost(string content);
 void deletePost(string targetID);
 void displayPost();
+void likePost(string postID);
+void displayTrendingPosts();
 
-void addFriend(string User1, string User2);
+void addfriend(string User1, string User2);
 void displayFriends(string userName);
 void removeFriend(string User1, string User2);
+void BFS(string startUser);
+void DFS(string startUser);
 
-void sendMessage(string toUser,string text);
+void sendMessage(string toUser, string text);
 void latestMessage(string withUser);
 void deleteLatestMessage(string withUser);
 void viewConversation(string withUser);
@@ -114,9 +122,16 @@ void peekNotification();
 void processNotification();
 
 void viewFeed();
-void displayTrendingPosts();
 
 void addStory(string content);
 void viewStory();
+
+AVLNode* avlInsert(AVLNode* node, string key, int value);
+AVLNode* avlDelete(AVLNode* node, string key);
+AVLNode* avlSearch(AVLNode* node, string key);
+void avlUpdateValue(AVLNode* node, string key, int value);
+void inorderTraversal(AVLNode* node);
+void getTopK(AVLNode* root, int k);
+void rangeQuery(AVLNode* node, int minVal, int maxVal);
 
 #endif
