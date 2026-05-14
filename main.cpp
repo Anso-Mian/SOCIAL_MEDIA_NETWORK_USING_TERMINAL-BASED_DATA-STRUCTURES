@@ -4,11 +4,22 @@
 
 using namespace std;
 
-int main(){
+int safeIntInput() {
+    int value;
+    while (!(cin >> value)) {
+        cin.clear();
+        cin.ignore(10000, '\n');
+        cout << "Invalid input. Please enter a number: ";
+    }
+    cin.ignore();
+    return value;
+}
+
+int main() {
     for(int i = 0; i < TABLE_SIZE; i++) hashTable[i] = nullptr;
 
     int choice;
-    while(true){
+    while(true) {
         if(currentUser != nullptr) { cout<<"Logged in as: "<<currentUser->userName<<endl; }
         else { cout<<"Not logged in"<<endl; }
 
@@ -23,8 +34,7 @@ int main(){
         cout<<"8. Exit"<<endl;
         cout<<"============================================"<<endl;
         cout<<"Enter choice: ";
-        cin>>choice;
-        cin.ignore();
+        choice = safeIntInput();
 
         switch(choice){
             case 1:{
@@ -37,8 +47,7 @@ int main(){
                 cout<<"6. Display Users"<<endl;
                 cout<<"7. Back"<<endl;
                 cout<<"Enter choice: ";
-                cin>>sub;
-                cin.ignore();
+                sub = safeIntInput();
                 switch(sub){
                     case 1:{
                         string u, p, e, b;
@@ -97,8 +106,7 @@ int main(){
                 cout<<"5. DFS Traversal"<<endl;
                 cout<<"6. Back"<<endl;
                 cout<<"Enter choice: ";
-                cin>>sub;
-                cin.ignore();
+                sub = safeIntInput();
                 switch(sub){
                     case 1:{
                         string u1, u2;
@@ -148,8 +156,7 @@ int main(){
                 cout<<"5. Like Post"<<endl;
                 cout<<"6. Back"<<endl;
                 cout<<"Enter choice: ";
-                cin>>sub;
-                cin.ignore();
+                sub = safeIntInput();
                 switch(sub){
                     case 1:{
                         string content;
@@ -188,8 +195,7 @@ int main(){
                 cout<<"2. View Stories"<<endl;
                 cout<<"3. Back"<<endl;
                 cout<<"Enter choice: ";
-                cin>>sub;
-                cin.ignore();
+                sub = safeIntInput();
                 switch(sub){
                     case 1:{
                         string content;
@@ -214,8 +220,7 @@ int main(){
                 cout<<"3. Process Notification"<<endl;
                 cout<<"4. Back"<<endl;
                 cout<<"Enter choice: ";
-                cin>>sub;
-                cin.ignore();
+                sub = safeIntInput();
                 switch(sub){
                     case 1:
                         viewNotification();
@@ -241,8 +246,7 @@ int main(){
                 cout<<"4. Range Query"<<endl;
                 cout<<"5. Back"<<endl;
                 cout<<"Enter choice: ";
-                cin>>sub;
-                cin.ignore();
+                sub = safeIntInput();
                 switch(sub){
                     case 1:
                         getTopK(userAVLRoot, 5);
@@ -258,9 +262,8 @@ int main(){
                         break;
                     case 4:{
                         int mn, mx;
-                        cout<<"Min value: "; cin>>mn;
-                        cout<<"Max value: "; cin>>mx;
-                        cin.ignore();
+                        cout<<"Min value: "; mn = safeIntInput();
+                        cout<<"Max value: "; mx = safeIntInput();
                         cout<<"Users in range:"<<endl;
                         rangeQuery(userAVLRoot, mn, mx);
                         cout<<"Posts in range:"<<endl;
@@ -282,8 +285,7 @@ int main(){
                 cout<<"4. View Conversation"<<endl;
                 cout<<"5. Back"<<endl;
                 cout<<"Enter choice: ";
-                cin>>sub;
-                cin.ignore();
+                sub = safeIntInput();
                 switch(sub){
                     case 1:{
                         string to, text;
