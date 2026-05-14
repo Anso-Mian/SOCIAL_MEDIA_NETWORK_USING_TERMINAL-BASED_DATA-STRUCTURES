@@ -68,7 +68,7 @@ AVLNode* avlInsert(AVLNode* node, string key, int value){
     if(key < node->key) { node->left = avlInsert(node->left, key, value); }
     else if(key > node->key) { node->right = avlInsert(node->right, key, value); }
     else{
-        node->value = value;
+        node->value = value;    //duplicate
         return node;
     }
     node->height = maxVal(getHeight(node->left), getHeight(node->right)) + 1;
@@ -983,7 +983,7 @@ void addStory(string content){
     else{
         Story* temp = storiesHead;
         while(temp->next != storiesHead) { temp = temp->next; }
-        temp->next = newStory;
+        temp->next = newStory; // last points to newStory
         newStory->next = storiesHead;
     }
 }

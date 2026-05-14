@@ -16,7 +16,9 @@ int safeIntInput() {
 }
 
 int main() {
-    for(int i = 0; i < TABLE_SIZE; i++) hashTable[i] = nullptr;
+    for(int i = 0; i < TABLE_SIZE; i++) {
+        hashTable[i] = nullptr;
+    }
 
     int choice;
     while(true) {
